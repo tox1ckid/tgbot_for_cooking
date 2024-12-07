@@ -30,9 +30,9 @@ def get_products_links(item_name):
     try:
         find_links = driver.find_elements(By.CLASS_NAME, 'tile-hover-target')
         products_urls = list(set([f'{link.get_attribute("href")}' for link in find_links]))
-        print('gotcha')
+        # print('gotcha')
     except:
-        print('smth wrong while parsing from OZON')
+        # print('smth wrong while parsing from OZON')
         return "bad"
 
     driver.close()
@@ -41,6 +41,7 @@ def get_products_links(item_name):
 
 
 def find_url(item_name='zxc'):
-    print('begin scaning')
+    # print('begin scaning')
     url = get_products_links(item_name=item_name)
-    print('end successful')
+    # print('end successful')
+    return url
