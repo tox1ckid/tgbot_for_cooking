@@ -33,21 +33,14 @@ def get_products_links(item_name):
         print('gotcha')
     except:
         print('smth wrong while parsing from OZON')
-
-    products_urls_dict = {}
-
-    for k, v in enumerate(products_urls):
-        products_urls_dict.update({k: v})
+        return "bad"
 
     driver.close()
     driver.quit()
+    return products_urls[0]
 
 
-def main(item_name):
+def find_url(item_name='zxc'):
     print('begin scaning')
-    get_products_links(item_name=item_name)
+    url = get_products_links(item_name=item_name)
     print('end successful')
-
-
-if __name__ == '__main__':
-    main()
