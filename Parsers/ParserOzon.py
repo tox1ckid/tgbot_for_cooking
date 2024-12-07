@@ -37,10 +37,3 @@ def get_products_links(item_name):
     driver.close()
     driver.quit()
     return products_urls[0]
-
-
-def find_url(item_name='zxc'):
-    # print('begin scaning')
-    url = get_products_links(item_name=item_name)
-    # print('end successful')
-    return url
