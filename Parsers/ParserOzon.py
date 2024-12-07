@@ -29,7 +29,7 @@ def get_products_links(item_name):
 
     try:
         find_links = driver.find_elements(By.CLASS_NAME, 'tile-hover-target')
-        products_urls = list([f'{link.get_attribute("href")}' for link in find_links])
+        products_urls = [f'{link.get_attribute("href")}' for link in find_links]
         # print('gotcha')
     except:
         raise IOError("Something went wrong while parsing eda.ru")
