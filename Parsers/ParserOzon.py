@@ -1,9 +1,14 @@
 import time
+
+import pyshorteners
 from fake_useragent import UserAgent
 from selenium import webdriver
 from selenium_stealth import stealth
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+
+def short_url(url):
+    return pyshorteners.Shortener().clckru.short(url)
 
 def get_random_chrome_user_agent():
     user_agent = UserAgent(browsers='chrome', os='windows', platforms='pc')
@@ -30,12 +35,12 @@ def get_products_links(item_name):
     time.sleep(2)
     find_input.send_keys(Keys.ENTER)
 
+    product_link = ""
     try:
-        find_links = driver.find_elements(By.CLASS_NAME, 'tile-hover-target')
-        products_urls = list([f'{link.get_attribute("href")}' for link in find_links])
+        product_link = short_url(driver.current_url)
     except:
-        raise IOError("Something went wrong while parsing eda.ru")
+        raise IOError("Something went wrong while parsing ozon.ru")
 
     driver.close()
     driver.quit()
-    return products_urls[0]
+    return product_link
