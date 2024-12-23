@@ -1,91 +1,205 @@
 import telebot
-from ParserEdaRu import find_dish_on_website
-import ParserOzon
+from ParserEdaRu import find_dish_on_website, calculate
+from ParserOzon import get_products_links
 
-remi = telebot.TeleBot('lala')  # the token
+# remy is the name of the bot (mouse in Ratatouille)
+remy = telebot.TeleBot('LALALA')  # the token
 
-dish = ''
-numb = 0
-name = ''
+text_help = 'Я - бот, который поможет тебе подобрать продукты для блюда и купить их, ' \
+            'попробуй написать мне, а я постараюсь помочь, вот мои команды: ' \
+            '\n /start - для начала работы' \
+            '\n /help - вызов помощи (этого сообщения) ' \
+            '\n /main_menu - перейти в главное меню '
 
 
-@remi.message_handler(commands=['start'], content_types=['text'])
-def start(message):
+@remy.message_handler(commands=['main_menu'])
+def main_menu(message):
     markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn0 = telebot.types.KeyboardButton('Хочу что-то приготовить')
     help = telebot.types.KeyboardButton('Помощь')
     markup.add(btn0, help)
-    remi.send_message(message.from_user.id, 'Привет! Я бот для готовки!', reply_markup=markup)
-    remi.register_next_step_handler(message, new_dish)
+    return markup
 
 
-@remi.message_handler(commands=['new_dish'], content_types=['text'])
+@remy.message_handler(commands=['start'])
+def start(message):
+    if message.text[0] == '/':
+        match message.text:
+            case '/help':
+                remy.send_message(message.from_user.id, text_help)
+                remy.register_next_step_handler(message, start)
+            case '/main_menu':
+                remy.register_next_step_handler(message, main_menu(message))
+                remy.register_next_step_handler(message, new_dish)
+
+    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn0 = telebot.types.KeyboardButton('Хочу что-то приготовить')
+    help = telebot.types.KeyboardButton('Помощь')
+    markup.add(btn0, help)
+    remy.send_message(message.from_user.id, 'Привет! Я бот для готовки!', reply_markup=markup)
+    remy.register_next_step_handler(message, new_dish)
+
+
+@remy.message_handler(commands=['new_dish'])
 def new_dish(message):
+    if message.text[0] == '/':
+        match message.text:
+            case '/start':
+                start(message)
+            case '/help':
+                remy.send_message(message.from_user.id, text_help)
+                remy.register_next_step_handler(message, new_dish)
+            case '/main_menu':
+                remy.send_message(chat_id=message.chat.id, text='Вы вернулись в главное меню',
+                                  reply_markup=main_menu(message))
+                remy.register_next_step_handler(message, new_dish)
+
     if message.text == 'Хочу что-то приготовить':
         markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn1 = telebot.types.KeyboardButton('да')
         btn2 = telebot.types.KeyboardButton('нет')
-        back = telebot.types.KeyboardButton('Вернуться назад (в главное меню)')
+        back = telebot.types.KeyboardButton('В главное меню')
         help = telebot.types.KeyboardButton('Помощь')
         markup.add(btn1, btn2, back, help)
-        remi.send_message(message.from_user.id, 'Вы знаете, что хотите приготовить?', reply_markup=markup)
+        remy.send_message(message.from_user.id, 'Вы знаете, что хотите приготовить?', reply_markup=markup)
+        remy.register_next_step_handler(message, do_user_know)
     elif message.text == 'Помощь':
-        remi.send_message(message.from_user.id,
-                          'Забыл представиться! Я - бот, который поможет тебе подобрать продукты для блюда и купить их, '
-                          'попробуй написать мне, а я постараюсь помочь')
-    remi.register_next_step_handler(message, do_user_know)
+        remy.send_message(message.from_user.id, text_help)
+        remy.register_next_step_handler(message, new_dish)
 
 
 def do_user_know(message):
+    if message.text[0] == '/':
+        match message.text:
+            case '/start':
+                start(message)
+            case '/help':
+                remy.send_message(message.from_user.id, text_help)
+                remy.register_next_step_handler(message, do_user_know)
+            case '/main_menu':
+                remy.send_message(chat_id=message.chat.id, text='Вы вернулись в главное меню',
+                                  reply_markup=main_menu(message))
+                remy.register_next_step_handler(message, new_dish)
+
+    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+    back = telebot.types.KeyboardButton('В главное меню')
+    help = telebot.types.KeyboardButton('Помощь')
+    markup.add(back, help)
+    
+
     if message.text == 'да':
-        remi.send_message(message.from_user.id, 'Ура! Напишите мне название блюда, а я скину вам рецепт!')
-        remi.register_next_step_handler(message, get_dish)  # следующий шаг – функция get_dish
+        remy.send_message(message.from_user.id, 'Ура! Напишите мне название блюда, а я скину вам рецепт!',
+                          reply_markup=markup)
+        remy.register_next_step_handler(message, get_dish)  # следующий шаг – функция get_dish
     elif message.text == 'нет':
-        print('todo')
+        b = 1
         # todo with random
     elif message.text == 'Помощь':
-        remi.send_message(message.from_user.id,
-                          'Забыл представиться! Я - бот, который поможет тебе подобрать продукты для блюда и купить их, '
-                          'попробуй написать мне, а я постараюсь помочь')
-    elif message.text == 'Вернуться назад (в главное меню)':
-        remi.register_next_step_handler(message, new_dish)
+        remy.send_message(message.from_user.id, text_help)
+        remy.register_next_step_handler(message, do_user_know)
+    elif message.text == 'В главное меню':
+        remy.send_message(chat_id=message.chat.id, text='Вы вернулись в главное меню', reply_markup=main_menu(message))
+        remy.register_next_step_handler(message, new_dish)
 
 
+@remy.message_handler(commands=['get_dish'])
 def get_dish(message):
+    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+    back = telebot.types.KeyboardButton('В главное меню')
+    help = telebot.types.KeyboardButton('Помощь')
+    markup.add(back, help)
+    if message.text[0] == '/':
+        match message.text:
+            case '/start':
+                start(message)
+            case '/help':
+                remy.send_message(message.from_user.id, text_help)
+                remy.register_next_step_handler(message, get_dish)
+            case '/main_menu':
+                remy.send_message(chat_id=message.chat.id, text='Вы вернулись в главное меню',
+                                  reply_markup=main_menu(message))
+                remy.register_next_step_handler(message, new_dish)
+
     global dish
     dish = message.text
-    if is_name_of_dish(dish):
-        remi.register_next_step_handler(message, get_number_of_portions)
+    if message.text == 'Помощь':
+        remy.send_message(message.from_user.id, text_help)
+        remy.register_next_step_handler(message, get_dish)
+    elif message.text == 'В главное меню':
+        remy.send_message(chat_id=message.chat.id, text='Вы вернулись в главное меню', reply_markup=main_menu(message))
+        remy.register_next_step_handler(message, new_dish)
+    elif dish[0] == '/':
+        a = 1
+    elif is_name_of_dish(dish):
+        remy.send_message(message.from_user.id, 'Сколько вы хотите порций?', reply_markup=markup)
+        remy.register_next_step_handler(message, get_number_of_portions, dish)
     else:
-        remi.send_message(message.from_user.id, 'К сожалению, такого блюда еще нет :(, хотите попробовать еще раз?')
+        remy.send_message(message.from_user.id, 'К сожалению, такого блюда еще нет :(, хотите попробовать еще раз? '
+                                                'Я верну вас в главное меню')
+        remy.send_message(chat_id=message.chat.id, text='Вы вернулись в главное меню', reply_markup=main_menu(message))
+        remy.register_next_step_handler(message, new_dish)
         # try ask again
 
 
 def is_name_of_dish(name):
-    # is the str7
-    if not find_dish_on_website(name):
-        return 0
-    # found the name on the site
-    else:
-        remi.register_next_step_handler(name, get_number_of_portions)
-    # if we found it, then go to prop
+    return find_dish_on_website(name)[0] != 0
+    # if we found it
 
 
-@remi.message_handler(commands=['portions'])
-def get_number_of_portions(message):
+@remy.message_handler(commands=['portions'])
+def get_number_of_portions(message, requested_dish):
+    if message.text[0] == '/':
+        match message.text:
+            case '/start':
+                start(message)
+            case '/help':
+                remy.send_message(message.from_user.id, text_help)
+                remy.register_next_step_handler(message, get_number_of_portions)
+            case '/main_menu':
+                remy.send_message(chat_id=message.chat.id, text='Вы вернулись в главное меню',
+                                  reply_markup=main_menu(message))
+                remy.register_next_step_handler(message, new_dish)
     global numb
-    numb = message.text()
-    remi.send_message(message.from_user.id, 'Сколько вы хотите порций?')
-    if numb.isnumeric:
-        remi.register_next_step_handler(message, process)
+    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+    back = telebot.types.KeyboardButton('В главное меню')
+    help = telebot.types.KeyboardButton('Помощь')
+    markup.add(back, help)
+    numb = message.text
+    
+
+    if message.text == 'Помощь':
+        remy.send_message(message.from_user.id, text_help)
+        remy.register_next_step_handler(message, get_number_of_portions)
+    elif message.text == 'В главное меню':
+        remy.send_message(chat_id=message.chat.id, text='Вы вернулись в главное меню', reply_markup=main_menu(message))
+        remy.register_next_step_handler(message, new_dish)
+    elif numb.isnumeric:
+        [ingredients, measures, links_products] = process(numb, requested_dish)
+        reply = 'Вот список продуктов:\n'
+
+        for i in range(len(ingredients)):
+            current = f'{ingredients[i]}, {' '.join(str(j) for j in measures[i])}, {links_products[i]}\n'
+            reply += current
+        reply += '\nУдачного кулинарного опыта!!! Зовите, если снова понадоблюсь! Отправляю вас в главное меню'
+        remy.send_message(message.from_user.id, reply, reply_markup=main_menu(message))
+        remy.register_next_step_handler(message, new_dish)
     else:
-        remi.send_message(message.from_user.id, 'Это не число :(, давайте попробуем еще раз')
-        remi.register_next_step_handler(message, get_number_of_portions)
+        remy.send_message(message.from_user.id, 'Это не число :(, давайте попробуем еще раз, введите число на этот раз')
+        remy.register_next_step_handler(message, get_number_of_portions, requested_dish)
 
 
-def process(n):
-    print(n)
-    # todo after we found the dish, need to get products, portions and amount
+def process(amount, requested_dish):
+    amount = int(amount)
+    [ingredients, measures] = find_dish_on_website(requested_dish)
+    measures = calculate(amount, measures)
+    links_products = []
+
+    for i in ingredients:
+        links_products.append(get_products_links(i))
+
+    return [ingredients, measures, links_products]
 
 
-remi.polling(none_stop=True)
+remy.polling(none_stop=True)
+
+
