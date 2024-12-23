@@ -85,14 +85,13 @@ def do_user_know(message):
     back = telebot.types.KeyboardButton('В главное меню')
     help = telebot.types.KeyboardButton('Помощь')
     markup.add(back, help)
-    
 
     if message.text == 'да':
         remy.send_message(message.from_user.id, 'Ура! Напишите мне название блюда, а я скину вам рецепт!',
                           reply_markup=markup)
         remy.register_next_step_handler(message, get_dish)  # следующий шаг – функция get_dish
     elif message.text == 'нет':
-        b = 1
+        remy.send_message(message.from_user.id, 'Пока в разработке :(')
         # todo with random
     elif message.text == 'Помощь':
         remy.send_message(message.from_user.id, text_help)
@@ -165,7 +164,6 @@ def get_number_of_portions(message, requested_dish):
     help = telebot.types.KeyboardButton('Помощь')
     markup.add(back, help)
     numb = message.text
-    
 
     if message.text == 'Помощь':
         remy.send_message(message.from_user.id, text_help)
@@ -178,7 +176,7 @@ def get_number_of_portions(message, requested_dish):
         reply = 'Вот список продуктов:\n'
 
         for i in range(len(ingredients)):
-            current = f'{ingredients[i]}, {' '.join(str(j) for j in measures[i])}, {links_products[i]}\n'
+            current = f'{ingredients[i]}, {" ".join(str(j) for j in measures[i])}, {links_products[i]}\n'
             reply += current
         reply += '\nУдачного кулинарного опыта!!! Зовите, если снова понадоблюсь! Отправляю вас в главное меню'
         remy.send_message(message.from_user.id, reply, reply_markup=main_menu(message))
@@ -201,5 +199,3 @@ def process(amount, requested_dish):
 
 
 remy.polling(none_stop=True)
-
-
