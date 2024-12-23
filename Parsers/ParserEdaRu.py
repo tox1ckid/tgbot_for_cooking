@@ -70,16 +70,16 @@ def find_dish_on_website(name='zxc'):  # returns [portions, ingredients, measure
 
         tries = 0
         while (((len(str(changing[0]))) != 0) and (
-                not changing[0].isnumeric())):  # удаляем непонятные символы на конце числа
+                not changing[0].isdigit())):  # удаляем непонятные символы на конце числа
             changing[0] = changing[0][:-1]
             tries += 1
-
-        changing[0] = int(changing[0])
 
         if (tries > 0):
             if (len(str(changing[0])) == 0):  # corner case
                 changing[0] = 0
-            changing[0] += 1  # TODO обрабатывать как 1/4 1/2 3/4
+            changing[0] = 1  # TODO обрабатывать как 1/4 1/2 3/4
+
+        changing[0] = int(changing[0])
 
         for name in confusing.keys():  # меняем типы данных
             if (name in changing[1]):
@@ -103,3 +103,4 @@ def calculate(portions, measure):
             measure[i][0] = math.ceil(float(portions) * measure[i][0])
 
     return measure
+
